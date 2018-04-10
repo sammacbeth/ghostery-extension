@@ -12,6 +12,7 @@ node('docker') {
 
     def img
     def artifact
+    def chromeZip
     def uploadPath = "cdncliqz/update/ghostery/${env.BRANCH_NAME}"
 
     stage('Build Docker Image') {
@@ -36,15 +37,26 @@ node('docker') {
         }
     }
 
-    stage('Publish') {
+    stage('Package Chrome') {
+        withGithubCredentials {
+            chromeZip = sh(returnStdout: true, script: 'ls build/ | grep chrome').trim()
+            echo "${chromeZip}"
+            sh 'ls -la build/'
+            sh "tools/crxmake.sh build/${chromeZip} ~/.ssh/id_rsa"
+            sh 'ls -la ./'
+        }
+    }
+
+    stage('Publish ZIP') {
         withCredentials([[
                 $class: 'UsernamePasswordMultiBinding',
                 credentialsId: '06ec4a34-9d01-46df-9ff8-64c79eda8b14',
                 passwordVariable: 'AWS_SECRET_ACCESS_KEY',
                 usernameVariable: 'AWS_ACCESS_KEY_ID']]) {
             echo "${env.BRANCH_NAME}/${env.BUILD_NUMBER}"
-            def uploadLocation = "s3://${uploadPath}/${artifact}"
+            def uploadLocation = "s3://${uploadPath}/"
             currentBuild.description = uploadLocation
+            sh "aws s3 cp build/${artifact.replace(".zip", ".crx")} ${uploadLocation}  --acl public-read"
             sh "aws s3 cp build/${artifact} ${uploadLocation}  --acl public-read"
         }
     }

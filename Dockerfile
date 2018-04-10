@@ -1,6 +1,6 @@
 FROM node:8
 
-RUN curl https://s3.amazonaws.com/cdncliqz/update/ghostery/moab/moab_8319dab > /bin/moab && \
+RUN curl https://s3.amazonaws.com/cdncliqz/update/ghostery/moab/moab_sam_8319dab > /bin/moab && \
     chmod +x /bin/moab
 
 ARG UID
