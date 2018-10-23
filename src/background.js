@@ -1796,3 +1796,7 @@ function init() {
 
 // Initialize the application.
 init();
+
+events.addPageListener((tab_id, info, apps, bugs) => {
+	cliqz.modules.insights.action('pushGhosteryPageStats', tab_id, info, apps, bugs);
+});
