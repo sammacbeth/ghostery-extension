@@ -75,6 +75,7 @@ const humanweb = cliqz.modules['human-web'];
 const { adblocker, antitracking, hpn } = cliqz.modules;
 const messageCenter = cliqz.modules['message-center'] || moduleMock;
 const offers = cliqz.modules['offers-v2'] || moduleMock;
+const insights = cliqz.modules.insights || moduleMock;
 let OFFERS_ENABLE_SIGNAL;
 
 /**
@@ -1259,6 +1260,17 @@ messageCenter.on('enabled', () => {
 			}
 		});
 	});
+});
+
+insights.on('enabled', () => {
+	events.addPageListener((tab_id, info, apps, bugs) => {
+		cliqz.modules.insights.action('pushGhosteryPageStats', tab_id, info, apps, bugs);
+	});
+	// calculate data saved using WhoTracks.Me API
+	window.CLIQZ.prefs.set('insights.datasaved', true);
+});
+insights.on('disabled', () => {
+	events.clearPageListeners();
 });
 
 /**
