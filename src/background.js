@@ -721,7 +721,7 @@ function onMessageHandler(request, sender, callback) {
 	} else if (name === 'getAndroidDashboardStats') {
 		if (insights.isEnabled) {
 			// message.interval can be 'day', 'week', 'month' or 'all'
-			insights.action('getDashboardStats', message.interval).then((stats) => {
+			getDashboardStats(message.interval).then((stats) => {
 				chrome.runtime.sendMessage({
 					target: 'ANDROID_BROWSER',
 					action: 'dashboardData',
@@ -1283,6 +1283,26 @@ insights.on('enabled', () => {
 insights.on('disabled', () => {
 	events.clearPageListeners();
 });
+
+function getDashboardStats(period) {
+	if (!cliqz.modules.insights || !cliqz.modules.insights.isEnabled) {
+		return Promise.reject();
+	}
+	return new Promise((resolve) => {
+		chrome.tabs.query({}, (tabs) => {
+			const activeTabStats = tabs.map(({ id }) => ({
+				tabId: id,
+				pageInfo: tabInfo.getTabInfo(id),
+				apps: foundBugs.getApps(id),
+				bugs: foundBugs.getBugs(id),
+			})).filter(({ pageInfo }) => pageInfo !== false);
+			resolve(cliqz.modules.insights.action('getDashboardStats',
+				period || 'all',
+				activeTabStats
+			));
+		});
+	});
+}
 
 /**
  * Initialize Ghostery panel.
