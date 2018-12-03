@@ -729,6 +729,17 @@ function onMessageHandler(request, sender, callback) {
 				});
 			});
 		}
+	} else if (name === 'clearAndroidDashboardStats') {
+		if (insights.isEnabled) {
+			// message.interval can be 'day', 'week', 'month' or 'all'
+			insights.action('clearData').then((removed) => {
+				chrome.runtime.sendMessage({
+					target: 'ANDROID_BROWSER',
+					action: 'dashboardData',
+					payload: removed,
+				});
+			});
+		}
 	} else if (name === 'getCliqzModuleData') {
 		const modules = { adblock: {}, antitracking: {} };
 		utils.getActiveTab((tab) => {
