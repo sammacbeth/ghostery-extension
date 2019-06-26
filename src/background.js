@@ -86,8 +86,6 @@ const insights = cliqz.modules.insights || moduleMock;
 // add ghostery module to expose ghostery state to cliqz
 cliqz.modules.ghostery = new GhosteryModule();
 
-insights.enable();
-
 let OFFERS_ENABLE_SIGNAL;
 
 /**
@@ -1702,6 +1700,7 @@ function initializeGhosteryModules() {
 	}
 	// start cliqz app
 	const cliqzStartup = cliqz.start().then(() => {
+		insights.enable();
 		// run wrapper tasks which set up base integrations between ghostery and these modules
 		Promise.all([
 			initialiseWebRequestPipeline(),
